@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cờ Caro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        /* Hiệu ứng nền chuyển màu động lung linh */
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(-45deg, #ff758c, #ff7eb3, #70a1ff, #2ed573, #ffbe76);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            overflow-x: hidden;
+            /* Chặn bôi đen văn bản trên toàn trang */
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        h1 {
+            font-size: 2.5rem; 
+            margin-bottom: 10px; 
+            font-weight: 800;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: linear-gradient(to right, #fff, #ffeaa7, #fff);
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .room-info {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 10px 20px; 
+            border-radius: 30px;
+            font-size: 0.95rem; 
+            margin-bottom: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            color: #1e293b;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status { 
+            font-size: 1.2rem; 
+            margin-bottom: 15px; 
+            color: #ffffff; 
+            font-weight: 700; 
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .status span { font-weight: 800; padding: 2px 8px; border-radius: 5px; }
+        
+        /* Màu sắc rực rỡ riêng biệt cho các phe */
+        .player-x { background: #00d2d3; color: #fff; text-shadow: 0 0 5px rgba(0,0,0,0.2); }
+        .player-o { background: #ff9ff3; color: #fff; text-shadow: 0 0 5px rgba(0,0,0,0.2); }
+        
+        /* Bàn cờ kẹo ngọt sắc màu */
+        .board-wrapper {
+            max-width: 100%;
+            overflow-x: auto;
+            padding: 10px;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(15, 34px);
+            grid-template-rows: repeat(15, 34px);
+            gap: 3px;
+            background: rgba(255, 255, 255, 0.3);
+            padding: 8px; 
+            border-radius: 16px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+            border: 3px solid rgba(255, 255, 255, 0.5);
+        }
+        .cell {
+            background-color: rgba(255, 255, 255, 0.85);
+            border-radius: 6px;
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            font-size: 1.5rem; 
+            font-weight: 800; 
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            user-select: none;
+            box-shadow: inset 0 -3px 0 rgba(0,0,0,0.1);
+        }
+        
+        /* Hiệu ứng di chuột đổi màu neon */
+        .cell:hover { 
+            background-color: #fff;
+            transform: scale(1.1);
+            box-shadow: 0 0 12px #fffe7a;
+            z-index: 2;
+        }
+        
+        /* Quân X Neon Xanh Dương Cực Đẹp */
+        .cell.X { 
+            color: #0abde3; 
+            background-color: #f0faff;
+            text-shadow: 0 0 8px rgba(10, 189, 227, 0.8); 
+            animation: popIn 0.25s ease-out;
+        }
+        /* Quân O Neon Hồng Kẹo Ngọt */
+        .cell.O { 
+            color: #f368e0; 
+            background-color: #fff0fa;
+            text-shadow: 0 0 8px rgba(243, 104, 224, 0.8); 
+            animation: popIn 0.25s ease-out;
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        /* Nút bấm Cute mềm mại */
+        .btn {
+            margin-top: 15px; 
+            background: linear-gradient(135deg, #ff6b6b, #ff8787);
+            color: white; 
+            border: none; 
+            padding: 12px 28px;
+            font-size: 1rem; 
+            font-weight: 700; 
+            border-radius: 50px;
+            cursor: pointer; 
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+        .btn:hover { 
+            transform: translateY(-3px) scale(1.03); 
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.6);
+        }
+        .btn:active { transform: translateY(1px); }
+        
+        .btn-copy { 
+            background: linear-gradient(135deg, #10ac84, #1dd1a1); 
+            margin-left: 5px; 
+            padding: 6px 14px; 
+            font-size: 0.8rem; 
+            box-shadow: 0 4px 12px rgba(29, 209, 161, 0.3);
+            border-radius: 20px;
+            color: white;
+        }
+        .btn-copy:hover {
+            box-shadow: 0 6px 18px rgba(29, 209, 161, 0.5);
+        }
+        #resetBtn {
+            background: linear-gradient(135deg, #ff9f43, #feca57);
+            box-shadow: 0 6px 20px rgba(254, 202, 87, 0.4);
+        }
+        #resetBtn:hover {
+            box-shadow: 0 8px 25px rgba(254, 202, 87, 0.6);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>CỜ CARO</h1>
+    <div class="room-info">
+        Mã phòng: <span id="roomIdLabel" style="color: #ee5253; font-weight:800;">...</span>
+        <button class="btn btn-copy" id="copyLinkBtn">Copy Link Mời Bạn</button>
+    </div>
+    
+    <div class="status" id="status">Đang kết nối...</div>
+
+    <div class="board-wrapper">
+        <div class="board" id="board"></div>
+    </div>
+
+    <button class="btn" id="resetBtn" style="display:none;">Chơi Trận Mới ✨</button>
+
+    <script>
+    // 1. Chặn chuột phải
+    document.addEventListener('contextmenu', event => event.preventDefault());
+
+    // 2. Chặn phím tắt (F12, Ctrl+Shift+I, Ctrl+U, v.v.)
+    document.addEventListener('keydown', event => {
+        if (event.keyCode === 123 || 
+           (event.ctrlKey && event.shiftKey && [73, 67, 74].includes(event.keyCode)) || 
+           (event.ctrlKey && event.keyCode === 85)) {
+            event.preventDefault();
+            return false;
+        }
+    });
+
+    // 3. SIÊU BẢO MẬT: Bẫy Debugger (Chặn mở bằng menu trình duyệt)
+    setInterval(function() {
+        // Lệnh debugger này sẽ làm treo công cụ Inspect nếu nó bị mở
+        (function() {
+            return false;
+        }['constructor']('debugger')['call']());
+    }, 50); // Kiểm tra mỗi 50ms - cực nhanh
+
+    // 4. Xóa sạch Console để không để lại dấu vết
+    setInterval(function() {
+        console.clear();
+        console.log("%cCảnh báo: Dừng lại ngay! Không được phép xem mã nguồn.", "color: red; font-size: 20px; font-weight: bold;");
+    }, 1000);
+</script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDkD2MbqQg5ZbdpIEjPBWDCO9Eq-A9Dgvk",
+            authDomain: "caro-1212.firebaseapp.com",
+            databaseURL: "https://caro-1212-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "caro-1212",
+            storageBucket: "caro-1212.firebasestorage.app",
+            messagingSenderId: "1042014143128",
+            appId: "1:1042014143128:web:ad64becb1013893f4ac6ed",
+            measurementId: "G-9H4WKZ4P2L"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        let roomId = urlParams.get('room');
+        let myRole = ""; 
+
+        const BOARD_SIZE = 15; 
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'click') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, now); 
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.1);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            } else if (type === 'drop') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.exponentialRampToValueAtTime(600, now + 0.12);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.12);
+                osc.start(now);
+                osc.stop(now + 0.12);
+            } else if (type === 'win') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now); 
+                osc.frequency.setValueAtTime(659.25, now + 0.1); 
+                osc.frequency.setValueAtTime(783.99, now + 0.2); 
+                osc.frequency.setValueAtTime(1046.50, now + 0.3); 
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.5);
+                osc.start(now);
+                osc.stop(now + 0.5);
+            }
+        }
+
+        if (!roomId) {
+            roomId = Math.floor(10000 + Math.random() * 90000).toString();
+            window.location.search = `?room=${roomId}`;
+        }
+
+        document.getElementById('roomIdLabel').textContent = roomId;
+        const roomRef = ref(db, 'rooms/' + roomId);
+
+        const boardElement = document.getElementById('board');
+        for (let i = 0; i < BOARD_SIZE * BOARD_SIZE; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.setAttribute('data-index', i);
+            boardElement.appendChild(cell);
+        }
+
+        let boardState = Array(BOARD_SIZE * BOARD_SIZE).fill("");
+        let currentPlayer = "X";
+        let isGameActive = true;
+        let lastBoardString = ""; 
+
+        const cells = document.querySelectorAll('.cell');
+        const statusElement = document.getElementById('status');
+        const resetBtn = document.getElementById('resetBtn');
+
+        onValue(roomRef, (snapshot) => {
+            const data = snapshot.val();
+            
+            if (!data) {
+                myRole = "X";
+                set(roomRef, {
+                    board: Array(BOARD_SIZE * BOARD_SIZE).fill(""),
+                    currentPlayer: "X",
+                    isGameActive: true,
+                    hasX: true,
+                    hasO: false
+                });
+                return;
+            }
+
+            if (myRole === "") {
+                if (data.hasX && !data.hasO) {
+                    myRole = "O";
+                    update(roomRef, { hasO: true });
+                } else if (!data.hasX) {
+                    myRole = "X";
+                    update(roomRef, { hasX: true });
+                } else {
+                    myRole = "Viewer";
+                }
+            }
+
+            boardState = data.board;
+            currentPlayer = data.currentPlayer;
+            
+            let currentBoardString = boardState.join("");
+            if (lastBoardString !== "" && currentBoardString !== lastBoardString) {
+                playSound('drop');
+            }
+            lastBoardString = currentBoardString;
+
+            let oldGameActive = isGameActive;
+            isGameActive = data.isGameActive;
+
+            cells.forEach((cell, index) => {
+                cell.textContent = boardState[index];
+                cell.className = "cell " + boardState[index];
+            });
+
+            if (myRole === "Viewer") {
+                statusElement.innerHTML = `👀 Bạn đang xem. Lượt của: <span class="player-${currentPlayer.toLowerCase()}">${currentPlayer}</span>`;
+                return;
+            }
+
+            if (!isGameActive) {
+                let gameWon = checkWinOnBoard();
+                if (gameWon) {
+                    let winner = currentPlayer === "X" ? "O" : "X";
+                    statusElement.innerHTML = `🎉 Chúc mừng! <span class="player-${winner.toLowerCase()}">Người chơi ${winner}</span> đã chiến thắng!`;
+                    if (oldGameActive !== isGameActive) {
+                        playSound('win'); 
+                    }
+                } else {
+                    statusElement.innerHTML = `🤝 Trận đấu kết thúc với kết quả Hòa!`;
+                }
+                resetBtn.style.display = "inline-block";
+                return;
+            }
+
+            resetBtn.style.display = "none";
+            if (currentPlayer === myRole) {
+                statusElement.innerHTML = `👉 <span class="player-${myRole.toLowerCase()}">Đến lượt bạn (${myRole})</span> - Hãy đi một nước cờ!`;
+            } else {
+                statusElement.innerHTML = `⏳ Đang chờ <span class="player-${currentPlayer.toLowerCase()}">Đối thủ (${currentPlayer})</span>...`;
+            }
+        });
+
+        boardElement.addEventListener('click', (e) => {
+            const clickedCell = e.target;
+            if (!clickedCell.classList.contains('cell') || !isGameActive || myRole === "Viewer") return;
+            
+            const index = parseInt(clickedCell.getAttribute('data-index'));
+            if (boardState[index] !== "" || currentPlayer !== myRole) return;
+
+            boardState[index] = myRole;
+            let nextPlayer = myRole === "X" ? "O" : "X";
+            
+            let row = Math.floor(index / BOARD_SIZE);
+            let col = index % BOARD_SIZE;
+            
+            let gameWon = checkWin5(row, col, myRole);
+            let gameDraw = !boardState.includes("") && !gameWon;
+            let activeState = true;
+            if (gameWon || gameDraw) activeState = false;
+
+            update(roomRef, {
+                board: boardState,
+                currentPlayer: nextPlayer,
+                isGameActive: activeState
+            });
+        });
+
+        function checkWin5(row, col, player) {
+            const directions = [
+                [[0, 1], [0, -1]],   
+                [[1, 0], [-1, 0]],   
+                [[1, 1], [-1, -1]],  
+                [[1, -1], [-1, 1]]   
+            ];
+
+            for (let i = 0; i < directions.length; i++) {
+                let count = 1;
+                for (let j = 0; j < 2; j++) {
+                    let dRow = directions[i][j][0];
+                    let dCol = directions[i][j][1];
+                    let r = row + dRow;
+                    let c = col + dCol;
+                    
+                    while (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE && boardState[r * BOARD_SIZE + c] === player) {
+                        count++;
+                        r += dRow;
+                        c += dCol;
+                    }
+                }
+                if (count >= 5) return true; 
+            }
+            return false;
+        }
+
+        function checkWinOnBoard() {
+            for (let r = 0; r < BOARD_SIZE; r++) {
+                for (let c = 0; c < BOARD_SIZE; c++) {
+                    let p = boardState[r * BOARD_SIZE + c];
+                    if (p !== "" && checkWin5(r, c, p)) return true;
+                }
+            }
+            return false;
+        }
+
+        resetBtn.addEventListener('click', () => {
+            playSound('click');
+            update(roomRef, {
+                board: Array(BOARD_SIZE * BOARD_SIZE).fill(""),
+                currentPlayer: "X",
+                isGameActive: true
+            });
+        });
+
+        document.getElementById('copyLinkBtn').addEventListener('click', () => {
+            playSound('click');
+            navigator.clipboard.writeText(window.location.href);
+            alert("Đã copy đường link phòng chơi! Hãy gửi link này cho bạn của bạn nhé.");
+        });
+    </script>
+</body>
+</html>
